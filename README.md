@@ -1,18 +1,798 @@
-<!-- ==================== NAVIGATION ==================== -->
-<nav class="fixed top-0 w-full bg-[#0a0a0a]/90 backdrop-blur-md border-b border-white/5 z-50 transition-all duration-300" id="navbar">
-    <div class="max-w-7xl mx-auto px-6 lg:px-8">
-        <div class="flex justify-between items-center h-20">
-            <!-- Logo -->
-            <div class="flex-shrink-0 cursor-pointer" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
-                <a href="{{ routes.root_url }}" class="text-lg font-bold tracking-[0.2em] uppercase">
-                    Generations<span class="font-light opacity-60">Studios</span>
-                </a>
+html_content = '''<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DawnDB - Shopify Theme Database Studio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #1e293b; }
+        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #64748b; }
+        
+        /* Animations */
+        @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes pulse-glow { 0%, 100% { box-shadow: 0 0 20px rgba(99, 102, 241, 0.3); } 50% { box-shadow: 0 0 30px rgba(99, 102, 241, 0.6); } }
+        @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-10px); } }
+        
+        .animate-slide-in { animation: slideIn 0.3s ease-out; }
+        .animate-pulse-glow { animation: pulse-glow 2s infinite; }
+        .animate-float { animation: float 3s ease-in-out infinite; }
+        
+        /* Glassmorphism */
+        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .glass-panel { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(20px); border: 1px solid rgba(99, 102, 241, 0.2); }
+        
+        /* Grid Pattern */
+        .grid-pattern { background-image: radial-gradient(circle at 1px 1px, rgba(99, 102, 241, 0.15) 1px, transparent 0); background-size: 20px 20px; }
+        
+        /* Code Editor */
+        .code-editor { background: #0f172a; color: #e2e8f0; caret-color: #6366f1; }
+        .line-numbers { color: #64748b; user-select: none; }
+        
+        /* Node Connections */
+        .connection-line { stroke: #6366f1; stroke-width: 2; fill: none; stroke-dasharray: 5,5; animation: dash 20s linear infinite; }
+        @keyframes dash { to { stroke-dashoffset: -100; } }
+        
+        /* Theme Preview Transitions */
+        .preview-section { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .preview-section:hover { transform: translateY(-2px); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); }
+        
+        /* Custom Range Slider */
+        input[type=range] { -webkit-appearance: none; background: transparent; }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 16px; width: 16px; border-radius: 50%; background: #6366f1; cursor: pointer; margin-top: -6px; }
+        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 4px; background: #334155; border-radius: 2px; }
+        
+        /* Toggle Switch */
+        .toggle { appearance: none; width: 44px; height: 24px; background: #334155; border-radius: 12px; position: relative; cursor: pointer; transition: background 0.3s; }
+        .toggle::after { content: ''; position: absolute; top: 2px; left: 2px; width: 20px; height: 20px; background: white; border-radius: 50%; transition: transform 0.3s; }
+        .toggle:checked { background: #6366f1; }
+        .toggle:checked::after { transform: translateX(20px); }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-200 overflow-hidden">
+
+    <!-- Background Effects -->
+    <div class="fixed inset-0 grid-pattern opacity-50 pointer-events-none"></div>
+    <div class="fixed top-0 left-1/4 w-96 h-96 bg-indigo-600/20 rounded-full blur-3xl pointer-events-none animate-float"></div>
+    <div class="fixed bottom-0 right-1/4 w-96 h-96 bg-purple-600/20 rounded-full blur-3xl pointer-events-none animate-float" style="animation-delay: 1.5s;"></div>
+
+    <!-- App Container -->
+    <div class="relative h-screen flex flex-col">
+        
+        <!-- Header -->
+        <header class="glass border-b border-slate-700/50 h-16 flex items-center justify-between px-6 z-50">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg animate-pulse-glow">
+                    <i data-lucide="database" class="w-5 h-5 text-white"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg tracking-tight">DawnDB</h1>
+                    <p class="text-xs text-slate-400">Theme Database Studio</p>
+                </div>
             </div>
             
-            <!-- Desktop Menu -->
-            <div class="hidden md:flex space-x-10">
-                <a href="#home" class="nav-link text-xs font-medium tracking-widest uppercase text-gray-400 hover:text-white transition-colors">Home</a>
-                <a href="#calendar" class="nav-link text-xs font-medium tracking-widest uppercase text-gray-400 hover:text-white transition-colors">Calendar</a>
+            <div class="flex items-center gap-4">
+                <div class="flex bg-slate-800/50 rounded-lg p-1 border border-slate-700">
+                    <button onclick="switchView('schema')" id="btn-schema" class="px-4 py-1.5 rounded-md text-sm font-medium transition-all bg-indigo-600 text-white shadow-lg">
+                        Schema
+                    </button>
+                    <button onclick="switchView('editor')" id="btn-editor" class="px-4 py-1.5 rounded-md text-sm font-medium transition-all text-slate-400 hover:text-white">
+                        Editor
+                    </button>
+                    <button onclick="switchView('preview')" id="btn-preview" class="px-4 py-1.5 rounded-md text-sm font-medium transition-all text-slate-400 hover:text-white">
+                        Preview
+                    </button>
+                </div>
+                
+                <button onclick="exportDatabase()" class="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-lg text-sm font-medium transition-colors">
+                    <i data-lucide="download" class="w-4 h-4"></i>
+                    Export
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="flex-1 overflow-hidden relative">
+            
+            <!-- SCHEMA VIEW -->
+            <div id="view-schema" class="absolute inset-0 overflow-auto p-8 animate-slide-in">
+                <div class="max-w-7xl mx-auto">
+                    <div class="mb-8">
+                        <h2 class="text-3xl font-bold mb-2 bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">Database Schema</h2>
+                        <p class="text-slate-400">Visual representation of Dawn theme data structure</p>
+                    </div>
+
+                    <!-- Schema Diagram -->
+                    <div class="glass-panel rounded-2xl p-8 mb-8 relative overflow-hidden">
+                        <svg class="absolute inset-0 w-full h-full pointer-events-none" id="schema-connections"></svg>
+                        
+                        <div class="grid grid-cols-4 gap-6 relative z-10">
+                            <!-- Stores Table -->
+                            <div class="bg-slate-800/80 rounded-xl border border-indigo-500/30 overflow-hidden hover:border-indigo-500/60 transition-colors cursor-pointer group" onclick="showTableDetails('stores')">
+                                <div class="bg-indigo-600/20 px-4 py-3 border-b border-indigo-500/30 flex items-center justify-between">
+                                    <span class="font-mono font-bold text-indigo-300">stores</span>
+                                    <i data-lucide="table" class="w-4 h-4 text-indigo-400"></i>
+                                </div>
+                                <div class="p-4 space-y-2 text-sm font-mono">
+                                    <div class="flex justify-between text-emerald-400"><span>id</span><span class="text-slate-500">PK</span></div>
+                                    <div class="flex justify-between text-slate-300"><span>shop_domain</span><span class="text-slate-500">UQ</span></div>
+                                    <div class="text-slate-400">shop_name</div>
+                                    <div class="text-slate-400">access_token</div>
+                                    <div class="text-slate-400">...</div>
+                                </div>
+                            </div>
+
+                            <!-- Themes Table -->
+                            <div class="bg-slate-800/80 rounded-xl border border-purple-500/30 overflow-hidden hover:border-purple-500/60 transition-colors cursor-pointer group" onclick="showTableDetails('themes')">
+                                <div class="bg-purple-600/20 px-4 py-3 border-b border-purple-500/30 flex items-center justify-between">
+                                    <span class="font-mono font-bold text-purple-300">themes</span>
+                                    <i data-lucide="layout" class="w-4 h-4 text-purple-400"></i>
+                                </div>
+                                <div class="p-4 space-y-2 text-sm font-mono">
+                                    <div class="flex justify-between text-emerald-400"><span>id</span><span class="text-slate-500">PK</span></div>
+                                    <div class="flex justify-between text-amber-400"><span>store_id</span><span class="text-slate-500">FK</span></div>
+                                    <div class="flex justify-between text-slate-300"><span>theme_id</span><span class="text-slate-500">UQ</span></div>
+                                    <div class="text-slate-400">name, role</div>
+                                    <div class="text-slate-400">version</div>
+                                </div>
+                            </div>
+
+                            <!-- Templates Table -->
+                            <div class="bg-slate-800/80 rounded-xl border border-cyan-500/30 overflow-hidden hover:border-cyan-500/60 transition-colors cursor-pointer group" onclick="showTableDetails('templates')">
+                                <div class="bg-cyan-600/20 px-4 py-3 border-b border-cyan-500/30 flex items-center justify-between">
+                                    <span class="font-mono font-bold text-cyan-300">templates</span>
+                                    <i data-lucide="file-code" class="w-4 h-4 text-cyan-400"></i>
+                                </div>
+                                <div class="p-4 space-y-2 text-sm font-mono">
+                                    <div class="flex justify-between text-emerald-400"><span>id</span><span class="text-slate-500">PK</span></div>
+                                    <div class="flex justify-between text-amber-400"><span>theme_id</span><span class="text-slate-500">FK</span></div>
+                                    <div class="text-slate-300">template_type</div>
+                                    <div class="text-slate-400">name, content</div>
+                                    <div class="text-slate-400">checksum</div>
+                                </div>
+                            </div>
+
+                            <!-- Assets Table -->
+                            <div class="bg-slate-800/80 rounded-xl border border-pink-500/30 overflow-hidden hover:border-pink-500/60 transition-colors cursor-pointer group" onclick="showTableDetails('assets')">
+                                <div class="bg-pink-600/20 px-4 py-3 border-b border-pink-500/30 flex items-center justify-between">
+                                    <span class="font-mono font-bold text-pink-300">theme_assets</span>
+                                    <i data-lucide="image" class="w-4 h-4 text-pink-400"></i>
+                                </div>
+                                <div class="p-4 space-y-2 text-sm font-mono">
+                                    <div class="flex justify-between text-emerald-400"><span>id</span><span class="text-slate-500">PK</span></div>
+                                    <div class="flex justify-between text-amber-400"><span>theme_id</span><span class="text-slate-500">FK</span></div>
+                                    <div class="text-slate-300">key</div>
+                                    <div class="text-slate-400">content_type</div>
+                                    <div class="text-slate-400">size, checksum</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Additional Tables Row -->
+                        <div class="grid grid-cols-3 gap-6 mt-6 max-w-4xl mx-auto">
+                            <div class="bg-slate-800/80 rounded-xl border border-orange-500/30 overflow-hidden hover:border-orange-500/60 transition-colors cursor-pointer" onclick="showTableDetails('settings')">
+                                <div class="bg-orange-600/20 px-4 py-3 border-b border-orange-500/30 flex items-center justify-between">
+                                    <span class="font-mono font-bold text-orange-300">theme_settings</span>
+                                    <i data-lucide="settings" class="w-4 h-4 text-orange-400"></i>
+                                </div>
+                                <div class="p-4 text-sm font-mono text-slate-400">JSON schemas & section configs</div>
+                            </div>
+
+                            <div class="bg-slate-800/80 rounded-xl border border-teal-500/30 overflow-hidden hover:border-teal-500/60 transition-colors cursor-pointer" onclick="showTableDetails('customizations')">
+                                <div class="bg-teal-600/20 px-4 py-3 border-b border-teal-500/30 flex items-center justify-between">
+                                    <span class="font-mono font-bold text-teal-300">theme_customizations</span>
+                                    <i data-lucide="sliders" class="w-4 h-4 text-teal-400"></i>
+                                </div>
+                                <div class="p-4 text-sm font-mono text-slate-400">Live editor settings storage</div>
+                            </div>
+
+                            <div class="bg-slate-800/80 rounded-xl border border-rose-500/30 overflow-hidden hover:border-rose-500/60 transition-colors cursor-pointer" onclick="showTableDetails('sync')">
+                                <div class="bg-rose-600/20 px-4 py-3 border-b border-rose-500/30 flex items-center justify-between">
+                                    <span class="font-mono font-bold text-rose-300">sync_history</span>
+                                    <i data-lucide="history" class="w-4 h-4 text-rose-400"></i>
+                                </div>
+                                <div class="p-4 text-sm font-mono text-slate-400">Deployment & sync tracking</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Stats Cards -->
+                    <div class="grid grid-cols-4 gap-4">
+                        <div class="glass rounded-xl p-4 border border-slate-700">
+                            <div class="text-2xl font-bold text-indigo-400">12</div>
+                            <div class="text-sm text-slate-400">Active Stores</div>
+                        </div>
+                        <div class="glass rounded-xl p-4 border border-slate-700">
+                            <div class="text-2xl font-bold text-purple-400">48</div>
+                            <div class="text-sm text-slate-400">Themes Stored</div>
+                        </div>
+                        <div class="glass rounded-xl p-4 border border-slate-700">
+                            <div class="text-2xl font-bold text-cyan-400">1,247</div>
+                            <div class="text-sm text-slate-400">Templates</div>
+                        </div>
+                        <div class="glass rounded-xl p-4 border border-slate-700">
+                            <div class="text-2xl font-bold text-pink-400">3.8GB</div>
+                            <div class="text-sm text-slate-400">Assets Storage</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- EDITOR VIEW -->
+            <div id="view-editor" class="absolute inset-0 hidden">
+                <div class="flex h-full">
+                    <!-- Sidebar -->
+                    <aside class="w-64 glass border-r border-slate-700/50 flex flex-col">
+                        <div class="p-4 border-b border-slate-700/50">
+                            <button onclick="newFile()" class="w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-lg font-medium transition-colors">
+                                <i data-lucide="plus" class="w-4 h-4"></i>
+                                New File
+                            </button>
+                        </div>
+                        
+                        <div class="flex-1 overflow-auto p-4">
+                            <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Layout</div>
+                            <div class="space-y-1 mb-6">
+                                <div class="flex items-center gap-2 px-3 py-2 rounded-lg bg-indigo-600/20 text-indigo-300 border border-indigo-500/30 cursor-pointer">
+                                    <i data-lucide="file" class="w-4 h-4"></i>
+                                    <span class="text-sm font-mono">theme.liquid</span>
+                                </div>
+                                <div class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-800 text-slate-400 cursor-pointer transition-colors">
+                                    <i data-lucide="file" class="w-4 h-4"></i>
+                                    <span class="text-sm font-mono">password.liquid</span>
+                                </div>
+                            </div>
+
+                            <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Templates</div>
+                            <div class="space-y-1 mb-6">
+                                <div class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-800 text-slate-400 cursor-pointer transition-colors">
+                                    <i data-lucide="file-json" class="w-4 h-4"></i>
+                                    <span class="text-sm font-mono">index.json</span>
+                                </div>
+                                <div class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-800 text-slate-400 cursor-pointer transition-colors">
+                                    <i data-lucide="file-json" class="w-4 h-4"></i>
+                                    <span class="text-sm font-mono">product.json</span>
+                                </div>
+                                <div class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-800 text-slate-400 cursor-pointer transition-colors">
+                                    <i data-lucide="file-json" class="w-4 h-4"></i>
+                                    <span class="text-sm font-mono">collection.json</span>
+                                </div>
+                            </div>
+
+                            <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Sections</div>
+                            <div class="space-y-1">
+                                <div class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-800 text-slate-400 cursor-pointer transition-colors">
+                                    <i data-lucide="puzzle" class="w-4 h-4"></i>
+                                    <span class="text-sm font-mono">header.liquid</span>
+                                </div>
+                                <div class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-800 text-slate-400 cursor-pointer transition-colors">
+                                    <i data-lucide="puzzle" class="w-4 h-4"></i>
+                                    <span class="text-sm font-mono">footer.liquid</span>
+                                </div>
+                                <div class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-800 text-slate-400 cursor-pointer transition-colors">
+                                    <i data-lucide="puzzle" class="w-4 h-4"></i>
+                                    <span class="text-sm font-mono">hero.liquid</span>
+                                </div>
+                            </div>
+                        </div>
+                    </aside>
+
+                    <!-- Editor Area -->
+                    <div class="flex-1 flex flex-col bg-slate-900">
+                        <div class="flex items-center justify-between px-4 py-2 bg-slate-800 border-b border-slate-700">
+                            <div class="flex items-center gap-2">
+                                <span class="text-sm font-mono text-slate-300">layout/theme.liquid</span>
+                                <span class="px-2 py-0.5 bg-emerald-500/20 text-emerald-400 text-xs rounded">Saved</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button onclick="formatCode()" class="p-2 hover:bg-slate-700 rounded-lg text-slate-400 hover:text-white transition-colors" title="Format">
+                                    <i data-lucide="align-left" class="w-4 h-4"></i>
+                                </button>
+                                <button onclick="saveFile()" class="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium transition-colors">
+                                    <i data-lucide="save" class="w-4 h-4"></i>
+                                    Save
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="flex-1 flex overflow-hidden">
+                            <div class="w-16 bg-slate-800/50 border-r border-slate-700 text-right py-4 pr-3 select-none">
+                                <div class="line-numbers text-sm space-y-1">
+                                    <div>1</div><div>2</div><div>3</div><div>4</div><div>5</div>
+                                    <div>6</div><div>7</div><div>8</div><div>9</div><div>10</div>
+                                    <div>11</div><div>12</div><div>13</div><div>14</div><div>15</div>
+                                </div>
+                            </div>
+                            <textarea id="code-editor" class="flex-1 code-editor font-mono text-sm p-4 resize-none outline-none" spellcheck="false"><!doctype html>
+<html>
+<head>
+  <title>{{ page_title }}</title>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="">
+  <link rel="canonical" href="{{ canonical_url }}">
+  
+  {{ content_for_header }}
+  
+  {{ 'base.css' | asset_url | stylesheet_tag }}
+</head>
+<body>
+  {% section 'announcement-bar' %}
+  {% section 'header' %}
+  
+  <main id="MainContent" role="main" tabindex="-1">
+    {{ content_for_layout }}
+  </main>
+  
+  {% section 'footer' %}
+</body>
+</html></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Properties Panel -->
+                    <aside class="w-72 glass border-l border-slate-700/50 overflow-auto">
+                        <div class="p-4 border-b border-slate-700/50">
+                            <h3 class="font-semibold text-slate-200">Properties</h3>
+                        </div>
+                        <div class="p-4 space-y-6">
+                            <div>
+                                <label class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 block">Template Info</label>
+                                <div class="space-y-3">
+                                    <div>
+                                        <label class="text-sm text-slate-400 block mb-1">Type</label>
+                                        <select class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 outline-none focus:border-indigo-500">
+                                            <option>layout</option>
+                                            <option>template</option>
+                                            <option>section</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="text-sm text-slate-400 block mb-1">Last Modified</label>
+                                        <div class="text-sm text-slate-300">Feb 18, 2026 14:32</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 block">Database</label>
+                                <div class="space-y-2">
+                                    <div class="flex justify-between text-sm">
+                                        <span class="text-slate-400">ID</span>
+                                        <span class="text-slate-300 font-mono">#12847</span>
+                                    </div>
+                                    <div class="flex justify-between text-sm">
+                                        <span class="text-slate-400">Theme ID</span>
+                                        <span class="text-slate-300 font-mono">123456</span>
+                                    </div>
+                                    <div class="flex justify-between text-sm">
+                                        <span class="text-slate-400">Checksum</span>
+                                        <span class="text-slate-300 font-mono">a1b2c3d4</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 block">Actions</label>
+                                <div class="space-y-2">
+                                    <button class="w-full py-2 px-3 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-lg text-sm text-slate-300 transition-colors text-left flex items-center gap-2">
+                                        <i data-lucide="copy" class="w-4 h-4"></i>
+                                        Duplicate
+                                    </button>
+                                    <button class="w-full py-2 px-3 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-lg text-sm text-slate-300 transition-colors text-left flex items-center gap-2">
+                                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                        Delete
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </aside>
+                </div>
+            </div>
+
+            <!-- PREVIEW VIEW -->
+            <div id="view-preview" class="absolute inset-0 hidden overflow-auto bg-white">
+                <!-- Preview Toolbar -->
+                <div class="sticky top-0 z-50 glass border-b border-slate-700/50 px-4 py-2 flex items-center justify-between">
+                    <div class="flex items-center gap-4">
+                        <div class="flex bg-slate-800 rounded-lg p-1">
+                            <button onclick="setDevice('desktop')" class="p-2 rounded-md bg-slate-700 text-white" id="device-desktop">
+                                <i data-lucide="monitor" class="w-4 h-4"></i>
+                            </button>
+                            <button onclick="setDevice('tablet')" class="p-2 rounded-md text-slate-400 hover:text-white" id="device-tablet">
+                                <i data-lucide="tablet" class="w-4 h-4"></i>
+                            </button>
+                            <button onclick="setDevice('mobile')" class="p-2 rounded-md text-slate-400 hover:text-white" id="device-mobile">
+                                <i data-lucide="smartphone" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                        <div class="h-6 w-px bg-slate-700"></div>
+                        <select class="bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 outline-none">
+                            <option>Dawn (Main)</option>
+                            <option>Dawn (Development)</option>
+                            <option>Craft (Unpublished)</option>
+                        </select>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium transition-colors">
+                            Publish Theme
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Preview Canvas -->
+                <div class="p-8 flex justify-center min-h-screen bg-slate-100">
+                    <div id="preview-canvas" class="bg-white shadow-2xl transition-all duration-500" style="width: 100%; max-width: 1200px;">
+                        
+                        <!-- Announcement Bar -->
+                        <div class="preview-section bg-indigo-600 text-white text-center py-2 text-sm">
+                            Free shipping on orders over $50
+                        </div>
+
+                        <!-- Header -->
+                        <header class="preview-section border-b sticky top-0 bg-white/95 backdrop-blur z-40">
+                            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                                <div class="flex justify-between items-center h-16">
+                                    <div class="flex items-center gap-8">
+                                        <h1 class="text-2xl font-bold text-slate-900">Dawn Store</h1>
+                                        <nav class="hidden md:flex gap-6 text-sm font-medium text-slate-600">
+                                            <a href="#" class="hover:text-slate-900">Shop</a>
+                                            <a href="#" class="hover:text-slate-900">Collections</a>
+                                            <a href="#" class="hover:text-slate-900">About</a>
+                                        </nav>
+                                    </div>
+                                    <div class="flex items-center gap-4">
+                                        <button class="p-2 hover:bg-slate-100 rounded-full">
+                                            <i data-lucide="search" class="w-5 h-5 text-slate-600"></i>
+                                        </button>
+                                        <button class="p-2 hover:bg-slate-100 rounded-full relative">
+                                            <i data-lucide="shopping-bag" class="w-5 h-5 text-slate-600"></i>
+                                            <span class="absolute -top-1 -right-1 w-4 h-4 bg-indigo-600 text-white text-xs rounded-full flex items-center justify-center">2</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </header>
+
+                        <!-- Hero Section -->
+                        <section class="preview-section relative bg-slate-900 text-white overflow-hidden">
+                            <div class="absolute inset-0 bg-gradient-to-r from-indigo-900/90 to-purple-900/90"></div>
+                            <img src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1200&h=600&fit=crop" alt="Hero" class="absolute inset-0 w-full h-full object-cover opacity-50">
+                            <div class="relative max-w-7xl mx-auto px-4 py-24 sm:px-6 lg:px-8 text-center">
+                                <h2 class="text-5xl font-bold mb-6">Spring Collection 2026</h2>
+                                <p class="text-xl text-slate-300 mb-8 max-w-2xl mx-auto">Discover our latest arrivals with up to 30% off on selected items. Limited time offer.</p>
+                                <div class="flex gap-4 justify-center">
+                                    <button class="px-8 py-3 bg-white text-slate-900 rounded-full font-semibold hover:bg-slate-100 transition-colors">Shop Now</button>
+                                    <button class="px-8 py-3 border-2 border-white text-white rounded-full font-semibold hover:bg-white/10 transition-colors">Learn More</button>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- Featured Collection -->
+                        <section class="preview-section py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                            <h3 class="text-2xl font-bold text-slate-900 mb-8">Featured Products</h3>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                                <!-- Product Cards -->
+                                <div class="group cursor-pointer">
+                                    <div class="aspect-square bg-slate-100 rounded-lg overflow-hidden mb-3">
+                                        <img src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=400&fit=crop" alt="Product" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                                    </div>
+                                    <h4 class="font-medium text-slate-900">Classic Cotton T-Shirt</h4>
+                                    <p class="text-slate-600">$29.00</p>
+                                </div>
+                                <div class="group cursor-pointer">
+                                    <div class="aspect-square bg-slate-100 rounded-lg overflow-hidden mb-3">
+                                        <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=400&fit=crop" alt="Product" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                                    </div>
+                                    <h4 class="font-medium text-slate-900">Running Sneakers</h4>
+                                    <p class="text-slate-600">$89.00</p>
+                                </div>
+                                <div class="group cursor-pointer">
+                                    <div class="aspect-square bg-slate-100 rounded-lg overflow-hidden mb-3">
+                                        <img src="https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=400&h=400&fit=crop" alt="Product" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                                    </div>
+                                    <h4 class="font-medium text-slate-900">Leather Backpack</h4>
+                                    <p class="text-slate-600">$120.00</p>
+                                </div>
+                                <div class="group cursor-pointer">
+                                    <div class="aspect-square bg-slate-100 rounded-lg overflow-hidden mb-3">
+                                        <img src="https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=400&h=400&fit=crop" alt="Product" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                                    </div>
+                                    <h4 class="font-medium text-slate-900">Sunglasses</h4>
+                                    <p class="text-slate-600">$45.00</p>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- Newsletter -->
+                        <section class="preview-section bg-slate-50 py-16">
+                            <div class="max-w-2xl mx-auto px-4 text-center">
+                                <h3 class="text-2xl font-bold text-slate-900 mb-4">Subscribe to our newsletter</h3>
+                                <p class="text-slate-600 mb-6">Get the latest updates on new products and upcoming sales.</p>
+                                <div class="flex gap-2 max-w-md mx-auto">
+                                    <input type="email" placeholder="Enter your email" class="flex-1 px-4 py-3 border border-slate-300 rounded-lg outline-none focus:border-indigo-500">
+                                    <button class="px-6 py-3 bg-slate-900 text-white rounded-lg font-medium hover:bg-slate-800 transition-colors">Subscribe</button>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- Footer -->
+                        <footer class="preview-section bg-slate-900 text-slate-300 py-12">
+                            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                                <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                                    <div>
+                                        <h4 class="text-white font-bold text-lg mb-4">Dawn Store</h4>
+                                        <p class="text-sm">Modern e-commerce built with Dawn theme.</p>
+                                    </div>
+                                    <div>
+                                        <h5 class="text-white font-semibold mb-4">Shop</h5>
+                                        <ul class="space-y-2 text-sm">
+                                            <li><a href="#" class="hover:text-white">All Products</a></li>
+                                            <li><a href="#" class="hover:text-white">Collections</a></li>
+                                            <li><a href="#" class="hover:text-white">New Arrivals</a></li>
+                                        </ul>
+                                    </div>
+                                    <div>
+                                        <h5 class="text-white font-semibold mb-4">Support</h5>
+                                        <ul class="space-y-2 text-sm">
+                                            <li><a href="#" class="hover:text-white">FAQ</a></li>
+                                            <li><a href="#" class="hover:text-white">Shipping</a></li>
+                                            <li><a href="#" class="hover:text-white">Returns</a></li>
+                                        </ul>
+                                    </div>
+                                    <div>
+                                        <h5 class="text-white font-semibold mb-4">Connect</h5>
+                                        <div class="flex gap-4">
+                                            <a href="#" class="hover:text-white"><i data-lucide="instagram" class="w-5 h-5"></i></a>
+                                            <a href="#" class="hover:text-white"><i data-lucide="twitter" class="w-5 h-5"></i></a>
+                                            <a href="#" class="hover:text-white"><i data-lucide="facebook" class="w-5 h-5"></i></a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="border-t border-slate-800 mt-8 pt-8 text-sm text-center">
+                                    © 2026 Dawn Store. All rights reserved.
+                                </div>
+                            </div>
+                        </footer>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Modal for Table Details -->
+    <div id="table-modal" class="fixed inset-0 z-[100] hidden">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeModal()"></div>
+        <div class="absolute inset-0 flex items-center justify-center p-4">
+            <div class="glass-panel rounded-2xl w-full max-w-3xl max-h-[80vh] overflow-hidden animate-slide-in">
+                <div class="p-6 border-b border-slate-700/50 flex items-center justify-between">
+                    <h3 id="modal-title" class="text-xl font-bold text-slate-200 font-mono">Table Details</h3>
+                    <button onclick="closeModal()" class="p-2 hover:bg-slate-800 rounded-lg transition-colors">
+                        <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                    </button>
+                </div>
+                <div class="p-6 overflow-auto max-h-[60vh]" id="modal-content">
+                    <!-- Dynamic content -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // View Switching
+        function switchView(view) {
+            // Hide all views
+            document.getElementById('view-schema').classList.add('hidden');
+            document.getElementById('view-editor').classList.add('hidden');
+            document.getElementById('view-preview').classList.add('hidden');
+            
+            // Show selected view
+            document.getElementById('view-' + view).classList.remove('hidden');
+            
+            // Update buttons
+            ['schema', 'editor', 'preview'].forEach(v => {
+                const btn = document.getElementById('btn-' + v);
+                if (v === view) {
+                    btn.classList.remove('text-slate-400');
+                    btn.classList.add('bg-indigo-600', 'text-white', 'shadow-lg');
+                } else {
+                    btn.classList.add('text-slate-400');
+                    btn.classList.remove('bg-indigo-600', 'text-white', 'shadow-lg');
+                }
+            });
+            
+            // Refresh icons
+            lucide.createIcons();
+        }
+
+        // Table Details Modal
+        const tableSchemas = {
+            stores: {
+                columns: [
+                    { name: 'id', type: 'INTEGER', constraints: 'PRIMARY KEY AUTOINCREMENT' },
+                    { name: 'shop_domain', type: 'TEXT', constraints: 'UNIQUE NOT NULL' },
+                    { name: 'shop_name', type: 'TEXT', constraints: 'NOT NULL' },
+                    { name: 'access_token', type: 'TEXT', constraints: '' },
+                    { name: 'email', type: 'TEXT', constraints: '' },
+                    { name: 'plan_name', type: 'TEXT', constraints: '' },
+                    { name: 'created_at', type: 'TIMESTAMP', constraints: 'DEFAULT CURRENT_TIMESTAMP' },
+                    { name: 'updated_at', type: 'TIMESTAMP', constraints: 'DEFAULT CURRENT_TIMESTAMP' },
+                    { name: 'is_active', type: 'BOOLEAN', constraints: 'DEFAULT 1' }
+                ],
+                indexes: ['idx_shop_domain'],
+                sample: [
+                    { id: 1, shop_domain: 'demo-store.myshopify.com', shop_name: 'Demo Store', plan_name: 'Basic' }
+                ]
+            },
+            themes: {
+                columns: [
+                    { name: 'id', type: 'INTEGER', constraints: 'PRIMARY KEY' },
+                    { name: 'store_id', type: 'INTEGER', constraints: 'FK → stores.id' },
+                    { name: 'theme_id', type: 'INTEGER', constraints: 'UNIQUE NOT NULL' },
+                    { name: 'name', type: 'TEXT', constraints: 'NOT NULL' },
+                    { name: 'role', type: 'TEXT', constraints: 'main/unpublished/dev' },
+                    { name: 'version', type: 'TEXT', constraints: '' }
+                ],
+                sample: [
+                    { id: 1, theme_id: 123456789, name: 'Dawn', role: 'main', version: '11.0.0' },
+                    { id: 2, theme_id: 987654321, name: 'Craft', role: 'unpublished', version: '1.0.0' }
+                ]
+            },
+            templates: {
+                columns: [
+                    { name: 'id', type: 'INTEGER', constraints: 'PRIMARY KEY' },
+                    { name: 'theme_id', type: 'INTEGER', constraints: 'FK → themes.id' },
+                    { name: 'template_type', type: 'TEXT', constraints: 'layout/template/section/snippet' },
+                    { name: 'name', type: 'TEXT', constraints: 'NOT NULL' },
+                    { name: 'content', type: 'TEXT', constraints: 'Liquid code' },
+                    { name: 'checksum', type: 'TEXT', constraints: 'SHA256' }
+                ],
+                sample: [
+                    { id: 1, template_type: 'layout', name: 'theme.liquid', checksum: 'a1b2c3...' },
+                    { id: 2, template_type: 'template', name: 'index.json', checksum: 'd4e5f6...' }
+                ]
+            }
+        };
+
+        function showTableDetails(table) {
+            const modal = document.getElementById('table-modal');
+            const title = document.getElementById('modal-title');
+            const content = document.getElementById('modal-content');
+            
+            const schema = tableSchemas[table] || tableSchemas.stores;
+            title.textContent = table;
+            
+            let html = `
+                <div class="mb-6">
+                    <h4 class="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-3">Columns</h4>
+                    <table class="w-full text-sm">
+                        <thead class="text-slate-500 border-b border-slate-700">
+                            <tr><th class="text-left py-2">Name</th><th class="text-left py-2">Type</th><th class="text-left py-2">Constraints</th></tr>
+                        </thead>
+                        <tbody class="text-slate-300">
+            `;
+            
+            schema.columns.forEach(col => {
+                html += `<tr class="border-b border-slate-800">
+                    <td class="py-2 font-mono text-emerald-400">${col.name}</td>
+                    <td class="py-2 text-indigo-300">${col.type}</td>
+                    <td class="py-2 text-slate-500">${col.constraints}</td>
+                </tr>`;
+            });
+            
+            html += `</tbody></table></div>`;
+            
+            if (schema.sample) {
+                html += `<div><h4 class="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-3">Sample Data</h4>
+                <div class="bg-slate-900 rounded-lg p-4 overflow-auto">
+                    <pre class="text-xs text-slate-300">${JSON.stringify(schema.sample, null, 2)}</pre>
+                </div></div>`;
+            }
+            
+            content.innerHTML = html;
+            modal.classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('table-modal').classList.add('hidden');
+        }
+
+        // Editor Functions
+        function newFile() {
+            alert('Create new file functionality would open here');
+        }
+
+        function formatCode() {
+            alert('Code formatting applied');
+        }
+
+        function saveFile() {
+            const btn = document.querySelector('button[onclick="saveFile()"]');
+            const original = btn.innerHTML;
+            btn.innerHTML = '<i data-lucide="check" class="w-4 h-4"></i> Saved';
+            btn.classList.add('bg-emerald-600');
+            btn.classList.remove('bg-indigo-600');
+            lucide.createIcons();
+            
+            setTimeout(() => {
+                btn.innerHTML = original;
+                btn.classList.remove('bg-emerald-600');
+                btn.classList.add('bg-indigo-600');
+                lucide.createIcons();
+            }, 2000);
+        }
+
+        // Preview Functions
+        function setDevice(device) {
+            const canvas = document.getElementById('preview-canvas');
+            const devices = ['desktop', 'tablet', 'mobile'];
+            
+            devices.forEach(d => {
+                const btn = document.getElementById('device-' + d);
+                if (d === device) {
+                    btn.classList.add('bg-slate-700', 'text-white');
+                    btn.classList.remove('text-slate-400');
+                } else {
+                    btn.classList.remove('bg-slate-700', 'text-white');
+                    btn.classList.add('text-slate-400');
+                }
+            });
+            
+            if (device === 'mobile') {
+                canvas.style.maxWidth = '375px';
+            } else if (device === 'tablet') {
+                canvas.style.maxWidth = '768px';
+            } else {
+                canvas.style.maxWidth = '1200px';
+            }
+        }
+
+        function exportDatabase() {
+            alert('Exporting database schema and data...');
+        }
+
+        // Draw connection lines in schema view
+        function drawConnections() {
+            const svg = document.getElementById('schema-connections');
+            if (!svg) return;
+            
+            // Simple visualization of connections
+            svg.innerHTML = `
+                <line x1="25%" y1="50%" x2="50%" y2="50%" class="connection-line" />
+                <line x1="50%" y1="50%" x2="75%" y1="50%" class="connection-line" />
+            `;
+        }
+
+        // Initialize
+        window.onload = () => {
+            drawConnections();
+            lucide.createIcons();
+        };
+    </script>
+</body>
+</html>'''
+
+# Save the HTML file
+output_path = '/mnt/kimi/output/dawn_theme_database.html'
+with open(output_path, 'w', encoding='utf-8') as f:
+    f.write(html_content)
+
+print(f"Dawn Theme Database Website generated successfully!")
+print(f" File location: {output_path}")
+print(f" File size: {len(html_content):,} characters")                <a href="#calendar" class="nav-link text-xs font-medium tracking-widest uppercase text-gray-400 hover:text-white transition-colors">Calendar</a>
                 <a href="#lab" class="nav-link text-xs font-medium tracking-widest uppercase text-gray-400 hover:text-white transition-colors">Creative Lab</a>
                 <a href="#shop" class="nav-link text-xs font-medium tracking-widest uppercase text-gray-400 hover:text-white transition-colors">Shop</a>
             </div>
@@ -289,21 +1069,21 @@
                     <h3 class="text-2xl font-bold mb-8 tracking-tight">Fabric Glossary</h3>
                     <div class="space-y-8">
                         <div class="flex gap-6 pb-8 border-b border-white/5">
-                            <div class="w-16 h-16 bg-[#0a0a0a] border border-white/10 flex items-center justify-center text-2xl flex-shrink-0">🧵</div>
+                            <div class="w-16 h-16 bg-[#0a0a0a] border border-white/10 flex items-center justify-center text-2xl flex-shrink-0"></div>
                             <div>
                                 <h4 class="font-bold mb-2 tracking-tight">Organic Cotton</h4>
                                 <p class="text-sm text-gray-400 leading-relaxed">Grown without synthetic pesticides, our organic cotton uses 91% less water than conventional cotton farming.</p>
                             </div>
                         </div>
                         <div class="flex gap-6 pb-8 border-b border-white/5">
-                            <div class="w-16 h-16 bg-[#0a0a0a] border border-white/10 flex items-center justify-center text-2xl flex-shrink-0">🧶</div>
+                            <div class="w-16 h-16 bg-[#0a0a0a] border border-white/10 flex items-center justify-center text-2xl flex-shrink-0"></div>
                             <div>
                                 <h4 class="font-bold mb-2 tracking-tight">Recycled Fleece</h4>
                                 <p class="text-sm text-gray-400 leading-relaxed">Made from post-consumer plastic bottles, transformed into ultra-soft fleece with superior warmth.</p>
                             </div>
                         </div>
                         <div class="flex gap-6">
-                            <div class="w-16 h-16 bg-[#0a0a0a] border border-white/10 flex items-center justify-center text-2xl flex-shrink-0">🪡</div>
+                            <div class="w-16 h-16 bg-[#0a0a0a] border border-white/10 flex items-center justify-center text-2xl flex-shrink-0"></div>
                             <div>
                                 <h4 class="font-bold mb-2 tracking-tight">Tencel™ Modal</h4>
                                 <p class="text-sm text-gray-400 leading-relaxed">Botanical fibers from sustainably harvested beech trees, known for exceptional breathability.</p>
@@ -1234,7 +2014,7 @@
                             </div>
                         </div>
                         <div class="flex gap-6 pb-8 border-b border-white/5">
-                            <div class="w-16 h-16 bg-[#0a0a0a] border border-white/10 flex items-center justify-center text-2xl flex-shrink-0">🧶</div>
+                            <div class="w-16 h-16 bg-[#0a0a0a] border border-white/10 flex items-center justify-center text-2xl flex-shrink-0"></div>
                             <div>
                                 <h4 class="font-bold mb-2 tracking-tight">Recycled Fleece</h4>
                                 <p class="text-sm text-gray-400 leading-relaxed">Made from post-consumer plastic bottles, transformed into ultra-soft fleece with superior warmth.</p>
@@ -2233,21 +3013,21 @@
                         <h3 class="text-2xl font-bold mb-8 tracking-tight">Fabric Glossary</h3>
                         <div class="space-y-8">
                             <div class="flex gap-6 pb-8 border-b border-white/5">
-                                <div class="w-16 h-16 bg-[#0a0a0a] border border-white/10 flex items-center justify-center text-2xl flex-shrink-0">🧵</div>
+                                <div class="w-16 h-16 bg-[#0a0a0a] border border-white/10 flex items-center justify-center text-2xl flex-shrink-0"></div>
                                 <div>
                                     <h4 class="font-bold mb-2 tracking-tight">Organic Cotton</h4>
                                     <p class="text-sm text-gray-400 leading-relaxed">Grown without synthetic pesticides, our organic cotton uses 91% less water than conventional cotton farming.</p>
                                 </div>
                             </div>
                             <div class="flex gap-6 pb-8 border-b border-white/5">
-                                <div class="w-16 h-16 bg-[#0a0a0a] border border-white/10 flex items-center justify-center text-2xl flex-shrink-0">🧶</div>
+                                <div class="w-16 h-16 bg-[#0a0a0a] border border-white/10 flex items-center justify-center text-2xl flex-shrink-0"></div>
                                 <div>
                                     <h4 class="font-bold mb-2 tracking-tight">Recycled Fleece</h4>
                                     <p class="text-sm text-gray-400 leading-relaxed">Made from post-consumer plastic bottles, transformed into ultra-soft fleece with superior warmth.</p>
                                 </div>
                             </div>
                             <div class="flex gap-6">
-                                <div class="w-16 h-16 bg-[#0a0a0a] border border-white/10 flex items-center justify-center text-2xl flex-shrink-0">🪡</div>
+                                <div class="w-16 h-16 bg-[#0a0a0a] border border-white/10 flex items-center justify-center text-2xl flex-shrink-0"></div>
                                 <div>
                                     <h4 class="font-bold mb-2 tracking-tight">Tencel™ Modal</h4>
                                     <p class="text-sm text-gray-400 leading-relaxed">Botanical fibers from sustainably harvested beech trees, known for exceptional breathability.</p>
